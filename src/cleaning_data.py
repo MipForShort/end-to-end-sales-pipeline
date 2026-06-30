@@ -6,9 +6,18 @@ from dotenv import load_dotenv
 
 #load_dotenv(encoding='utf-8')
 
-def dataframe_ventas():
+CONFIG = {
+    'ventas': './data/VPD/ventas_*.csv',
+    'clientes': './data/clientes.csv',
+    'productos': './data/productos.xlsx',
+    'sucursales': './data/sucursales.csv'
+}
+
+
+def dataframe_ventas(ruta):
+    
     # Esta linea nos guarda en una lista las rutas de cada archivo en ./data/VPD
-    archivos = glob.glob('./data/VPD/ventas_*.csv')
+    archivos = glob.glob(ruta)
     lista_dfs = []
 
     for file_name in archivos:
@@ -26,6 +35,7 @@ def dataframe_ventas():
         # Agregamos el df a nuestra lista 
         lista_dfs.append(df)
 
+    # Juntamos todos los dataframes en uno solo
     all_dataframes = pd.concat(lista_dfs, ignore_index= True)
 
     #filas_duplicadas = all_dataframes.duplicated().sum()
@@ -33,6 +43,9 @@ def dataframe_ventas():
 
     # Reemplazamos el nombre Id a id
     #all_dataframes.rename(columns={'Id': 'id'}, inplace=True)
+
+    # Ordenamos los indices por fecha_venta
+    all_dataframes = all_dataframes.sort_values(by='fecha_venta').reset_index(drop=True)
 
     # No se ocupo la linea anterior, por que vamos a crear una nueva columna llamana id
     # Y la pondremos al principio del dataframe
@@ -51,15 +64,107 @@ def dataframe_ventas():
 
     all_dataframes['fecha_entrega'] = pd.to_datetime(all_dataframes['fecha_entrega'], format='%Y-%m-%d')
 
-    # Vemos como va el proceso
-    #print(all_dataframes.head(5))
-    #print(all_dataframes.info())
-
     return all_dataframes
 
 
-if __name__ == '__main__':
-    ventas = dataframe_ventas()
-    print(ventas.info())
-    print(ventas.head())
+def dataframe_clientes(ruta):
+    
+    df = pd.read_csv(ruta)
 
+    df.rename(columns={'Id': 'id',
+                       'Nombre': 'nombre',
+                       'Apellido': 'apellido',
+                       'Correo Electrónico': 'email',
+                       'País': 'pais',
+                       'Teléfono': 'telefono',
+                       'Dirección': 'direccion',
+                       'Ciudad': 'ciudad'
+                       }, inplace=True)
+    
+    # Quitamos todo lo que no sea digito del telefono
+    df['telefono'] = df['telefono'].str.replace(r'\D', '', regex=True)
+
+    # Revisamos si hay filas duplicadas
+    #filas_duplicadas = df.duplicated().sum()
+    #print(f"Filas duplicadas: {filas_duplicadas}")
+
+    return df
+
+
+def dataframe_productos(ruta):
+
+    df = pd.read_excel(ruta, engine='openpyxl', sheet_name='productos')
+
+    df.rename(columns={'Id': 'id',
+                       'Nombre': 'nombre',
+                       'Descripción': 'descripcion',
+                       'Categoría': 'categoria',
+                       }, inplace=True)
+    
+    # Revisamos si hay filas duplicadas
+    #filas_duplicadas = df.duplicated().sum()
+    #print(f"Filas duplicadas: {filas_duplicadas}")
+
+    # Este df no necesitó limpieza
+    return df
+
+
+def dataframe_proveedores(ruta):
+
+    df = pd.read_excel(ruta, engine='openpyxl', sheet_name='proveedores')
+
+    df.rename(columns={'Id': 'id',
+                       'Nombre': 'nombre',
+                       'Contacto': 'contacto',
+                       'Teléfono': 'telefono',
+                       'Correo Electrónico': 'email',
+                       'Dirección': 'direccion'}, inplace=True)
+    
+    df['telefono'] = df['telefono'].astype(str)
+
+    # Revisamos si hay filas duplicadas
+    #filas_duplicadas = df.duplicated().sum()
+    #print(f"Filas duplicadas: {filas_duplicadas}")
+
+    return df
+
+
+def dataframe_sucursales(ruta):
+
+    df = pd.read_csv(ruta)
+
+    df.rename(columns={'dirección': 'direccion'}, inplace=True)
+
+    # Separamos la columna ubicacion en tres columnas distintas
+    df[['region', 'pais', 'ciudad']] = df['ubicacion'].str.split('/', expand=True)
+
+    # Eliminamos la columna 'ubicacion' y 'url'
+    df = df.drop(columns=['ubicacion', 'url'])
+
+    # Reordenamos las columnas
+    orden_columnas = ['id', 'nombre', 'direccion', 'encargado', 'region', 'pais', 'ciudad', 'latitud', 'longitud']
+    df = df[orden_columnas]
+
+    # Revisamos si hay filas duplicadas
+    #filas_duplicadas = df.duplicated().sum()
+    #print(f"Filas duplicadas: {filas_duplicadas}")
+
+    return df
+
+
+if __name__ == '__main__':
+    
+    ventas = dataframe_ventas(CONFIG['ventas'])
+    print(ventas.info())
+
+    clientes = dataframe_clientes(CONFIG['clientes'])
+    print(clientes.info())
+
+    productos = dataframe_productos(CONFIG['productos'])
+    print(productos.info())
+
+    proveedores = dataframe_proveedores(CONFIG['productos'])
+    print(proveedores.info())
+
+    sucursales = dataframe_sucursales(CONFIG['sucursales'])
+    print(sucursales.info())
