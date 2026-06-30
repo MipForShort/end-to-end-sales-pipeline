@@ -39,7 +39,7 @@ DB_USER=your_username
 DB_PASS=your_password
 DB_HOST=localhost
 DB_PORT=5432
-DB_NAME=sales_db
+DB_NAME=edutin_sales
 ```
 
 5. Create the database from your terminal if using Linux/MacOS by executing `psql` first. Once done, create the database with the next command:
