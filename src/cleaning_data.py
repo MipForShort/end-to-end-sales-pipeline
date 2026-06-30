@@ -7,7 +7,9 @@ from bs4 import BeautifulSoup
 #from sqlalchemy import create_engine
 #from dotenv import load_dotenv
 
+
 #load_dotenv(encoding='utf-8')
+
 
 CONFIG = {
     'ventas': './data/VPD/ventas_*.csv',
@@ -32,7 +34,8 @@ def dataframe_ventas(ruta: str):
         lista_dfs = []
 
         for file_name in archivos:
-            df = pd.read_csv(file_name)
+
+            df = cargar_archivo(file_name)
 
             # 1. Extraemos solo el nombre del archivo: ventas_01-05-2024.csv
             nombre_archivo = os.path.basename(file_name)
@@ -79,11 +82,14 @@ def dataframe_ventas(ruta: str):
     except FileNotFoundError:
         print(f"Archivo no encontrado: {ruta}")
         return pd.DataFrame()
+    except Exception as e:
+        print(f"Error inesperado: {e}")
+        return pd.DataFrame()
 
 
 def dataframe_clientes(ruta: str):
     try:
-        df = pd.read_csv(ruta)
+        df = cargar_archivo(ruta)
 
         # Renombramos las columnas
         df.rename(columns={'Id': 'id',
@@ -107,11 +113,17 @@ def dataframe_clientes(ruta: str):
     except FileNotFoundError:
         print(f"Archivo no encontrado: {ruta}")
         return pd.DataFrame()
+    except Exception as e:
+        print(f"Error inesperado: {e}")
+        return pd.DataFrame()
 
 
 def dataframe_productos(ruta: str):
     try:
-        df = pd.read_excel(ruta, engine='openpyxl', sheet_name='productos')
+        if ruta.endswith(".csv"):
+            df = pd.read_csv(ruta)
+        elif ruta.endswith(".xlsx"):
+            df = pd.read_excel(ruta, engine='openpyxl', sheet_name='productos')
 
         # Renombramos las columnas 
         df.rename(columns={'Id': 'id',
@@ -129,11 +141,17 @@ def dataframe_productos(ruta: str):
     except FileNotFoundError:
         print(f"Archivo no encontrado: {ruta}")
         return pd.DataFrame()
+    except Exception as e:
+        print(f"Error inesperado: {e}")
+        return pd.DataFrame()
 
 
 def dataframe_proveedores(ruta: str):
     try:
-        df = pd.read_excel(ruta, engine='openpyxl', sheet_name='proveedores')
+        if ruta.endswith(".csv"):
+            df = pd.read_csv(ruta)
+        elif ruta.endswith(".xlsx"):
+            df = pd.read_excel(ruta, engine='openpyxl', sheet_name='proveedores')
 
         # Renombramos las columnas
         df.rename(columns={'Id': 'id',
@@ -153,11 +171,14 @@ def dataframe_proveedores(ruta: str):
     except FileNotFoundError:
         print(f"Archivo no encontrado: {ruta}")
         return pd.DataFrame()
+    except Exception as e:
+        print(f"Error inesperado: {e}")
+        return pd.DataFrame()
 
 
 def dataframe_sucursales(ruta: str):
     try:
-        df = pd.read_csv(ruta)
+        df = cargar_archivo(ruta)
 
         # Renombramos las columnas
         df.rename(columns={'dirección': 'direccion'}, inplace=True)
@@ -180,14 +201,15 @@ def dataframe_sucursales(ruta: str):
     except FileNotFoundError:
         print(f"Archivo no encontrado: {ruta}")
         return pd.DataFrame()
+    except Exception as e:
+        print(f"Error inesperado: {e}")
+        return pd.DataFrame()
 
 
 def dataframe_productos_proveedor(ruta: str):
     try:
         # Leemos un archivo pdf con la ruta de nuestro CONFIG
-        table = tabula.read_pdf(ruta, pages="all")
-        # Esta linea hace nuestro dataframe de la primer tabla que encontramos (la unica)
-        df = table[0]
+        df = cargar_archivo(ruta)
 
         # Renombramos las columnas
         df.rename(columns={'días_entrega': 'dias_entrega'}, inplace=True)
@@ -199,6 +221,9 @@ def dataframe_productos_proveedor(ruta: str):
         return df
     except FileNotFoundError:
         print(f"Archivo no encontrado: {ruta}")
+        return pd.DataFrame()
+    except Exception as e:
+        print(f"Error inesperado: {e}")
         return pd.DataFrame()
 
 
@@ -232,37 +257,63 @@ def dataframe_pais_url(ruta: str):
 
         return df
     except Exception as e:
-        print(f"Error procesando la web: {e}")
+        print(f"Error inesperado: {e}")
         return pd.DataFrame()
 
+
+def cargar_archivo(ruta: str):
+    if ruta.endswith(".csv"):
+        return pd.read_csv(ruta)
+    elif ruta.endswith(".xlsx"):
+        return pd.read_excel(ruta, engine="openpyxl")
+    elif ruta.endswith(".pdf"):
+        # Tabula devuelve una lista, tomamos la primera tabla
+        return tabula.read_pdf(ruta, pages="all")[0]
+    else:
+        raise ValueError(f"Formato no soportado: {ruta}")
+    
 
 if __name__ == '__main__':
     
     ventas = dataframe_ventas(CONFIG['ventas'])
+    #print("Ventas")
     #print(ventas.info())
     #print(ventas.head())
+    #print()
 
     clientes = dataframe_clientes(CONFIG['clientes'])
+    #print("Clientes")
     #print(clientes.info())
     #print(clientes.head())
+    #print()
 
     productos = dataframe_productos(CONFIG['productos'])
+    #print("Productos")
     #print(productos.info())
     #print(productos.head())
+    #print()
 
     proveedores = dataframe_proveedores(CONFIG['productos'])
+    #print("Proveedores")
     #print(proveedores.info())
     #print(proveedores.head())
+    #print()
 
     sucursales = dataframe_sucursales(CONFIG['sucursales'])
+    #print("Sucursales")
     #print(sucursales.info())
     #print(sucursales.head())
+    #print()
 
     productos_proveedor = dataframe_productos_proveedor(CONFIG['productos_proveedor'])
+    #print("Productos-Proveedor")
     #print(productos_proveedor.info())
     #print(productos_proveedor.head())
+    #print()
 
     pais = dataframe_pais_url(CONFIG['pais_url'])
+    #print("Pais")
     #print(pais.info())
     #print(pais.head())
+    #print()
 
