@@ -4,11 +4,6 @@ import glob
 import tabula
 import requests
 from bs4 import BeautifulSoup
-#from sqlalchemy import create_engine
-#from dotenv import load_dotenv
-
-
-#load_dotenv(encoding='utf-8')
 
 
 CONFIG = {
@@ -214,9 +209,8 @@ def dataframe_productos_proveedor(ruta: str):
         # Renombramos las columnas
         df.rename(columns={'días_entrega': 'dias_entrega'}, inplace=True)
 
-        # Revisamos si hay filas duplicadas
-        #filas_duplicadas = df.duplicated().sum()
-        #print(f"Filas duplicadas: {filas_duplicadas}")
+        # Eliminamos duplicados
+        df = df.drop_duplicates(subset=['producto_id', 'proveedor_id'])
 
         return df
     except FileNotFoundError:
@@ -276,44 +270,44 @@ def cargar_archivo(ruta: str):
 if __name__ == '__main__':
     
     ventas = dataframe_ventas(CONFIG['ventas'])
-    #print("Ventas")
-    #print(ventas.info())
+    print("Ventas")
+    print(ventas.info())
     #print(ventas.head())
     #print()
 
     clientes = dataframe_clientes(CONFIG['clientes'])
-    #print("Clientes")
-    #print(clientes.info())
+    print("Clientes")
+    print(clientes.info())
     #print(clientes.head())
     #print()
 
     productos = dataframe_productos(CONFIG['productos'])
-    #print("Productos")
-    #print(productos.info())
+    print("Productos")
+    print(productos.info())
     #print(productos.head())
     #print()
 
     proveedores = dataframe_proveedores(CONFIG['productos'])
-    #print("Proveedores")
-    #print(proveedores.info())
+    print("Proveedores")
+    print(proveedores.info())
     #print(proveedores.head())
     #print()
 
     sucursales = dataframe_sucursales(CONFIG['sucursales'])
-    #print("Sucursales")
-    #print(sucursales.info())
+    print("Sucursales")
+    print(sucursales.info())
     #print(sucursales.head())
     #print()
 
     productos_proveedor = dataframe_productos_proveedor(CONFIG['productos_proveedor'])
-    #print("Productos-Proveedor")
-    #print(productos_proveedor.info())
+    print("Productos-Proveedor")
+    print(productos_proveedor.info())
     #print(productos_proveedor.head())
     #print()
 
     pais = dataframe_pais_url(CONFIG['pais_url'])
-    #print("Pais")
-    #print(pais.info())
+    print("Pais")
+    print(pais.info())
     #print(pais.head())
     #print()
 
