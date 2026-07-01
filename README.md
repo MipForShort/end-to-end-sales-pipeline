@@ -1,4 +1,25 @@
-# Work in progress
+# End-to-End Sales Pipeline
+
+This project consists of an automated end-to-end data pipeline designed to transform raw data from various sources into structured information, ready for analysis in a PostgreSQL database.
+
+## Project Description
+The system extracts data from CSV files, Excel spreadsheets, PDF documents (using specialized extraction techniques), and performs web scraping to gather country data, ensuring all information is normalized and correctly loaded into a defined relational schema.
+
+## Technologies Used
+* **Language:** Python
+* **Data Processing:** Pandas
+* **Database:** PostgreSQL
+* **ORM / Connectors:** SQLAlchemy, psycopg2
+* **Web Scraping:** BeautifulSoup
+* **PDF Extraction:** Tabula-py
+* **Environment Management:** Python-dotenv
+
+## Pipeline Architecture
+1. **Extraction:** Loading data from multiple heterogeneous sources.
+2. **Transformation:** Cleaning, data type normalization, date handling, and duplicate resolution.
+3. **Loading:** Insertion into a relational schema with guaranteed referential integrity (Foreign Keys).
+
+---
 
 ## How to Run the Project
 
